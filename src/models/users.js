@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    trim: true,
     default: "N/A",
   },
   tokens: [

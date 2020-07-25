@@ -1,7 +1,7 @@
 const express = require("express");
 const Users = require("../models/users");
 const auth = require("../middleware/auth");
-const role = require("../middleware/role");
+const { admin, role } = require("../middleware/role");
 
 const router = new express.Router();
 
@@ -27,7 +27,16 @@ router.post("/login", async (req, res) => {
     res.status(400).send({ error: "Invalid email or password" });
   }
 });
-
+router.post("/logout", auth, async (req, res) => {
+  try {
+    const user = req.user;
+    user.tokens = user.tokens.filter((curr) => curr.token !== req.token);
+    await user.save();
+    res.send();
+  } catch (err) {
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
 router.get("/", auth, role, async (req, res) => {
   try {
     const users = await Users.find({});
@@ -35,11 +44,25 @@ router.get("/", auth, role, async (req, res) => {
       const obj = curr.toObject();
       delete obj.password;
       delete obj.tokens;
+      obj.key = obj._id;
+      delete obj._id;
       return obj;
     });
     res.send(modified);
   } catch (err) {
     res.status(500).send({ error: "An internal error occured" });
+  }
+});
+router.put("/", auth, admin, async (req, res) => {
+  const id = req.body.key;
+  try {
+    const user = await Users.findById(id);
+    if (!user) throw new Error();
+    user.role = req.body.role;
+    await user.save();
+    res.send();
+  } catch (err) {
+    res.status(404).send({ error: "User not found" });
   }
 });
 module.exports = router;
