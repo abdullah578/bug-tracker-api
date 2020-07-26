@@ -11,10 +11,10 @@ const projSchema = new mongoose.Schema({
   },
   users: [
     {
+      _id: false,
       user: {
         required: true,
         type: mongoose.Schema.Types.ObjectId,
-        _id: false,
         ref: "users",
       },
     },

@@ -9,7 +9,7 @@ router.post("/", auth, admin, async (req, res) => {
   try {
     const project = new Project(req.body);
     await project.save();
-    res.status(201).send(req.body);
+    res.status(201).send({ name: project._id });
   } catch (err) {
     res.status(400).send({ error: "Failed to save project" });
   }
@@ -30,8 +30,9 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-router.post("/users", auth, role, async (req, res) => {
-  const { projid, userid } = req.body;
+router.post("/:id/users", auth, role, async (req, res) => {
+  const projid = req.params.id;
+  const userid = req.body.userid;
   try {
     const project = await Project.findById(projid);
     project.users.push({ user: userid });
@@ -46,11 +47,12 @@ router.get("/:id/users", auth, async (req, res) => {
   const projid = req.params.id;
   try {
     const project = await Project.findById(projid);
+    if (!project.users.length) return res.send([]);
     await project.populate("users.user").execPopulate();
     const users = project.users.map((curr) => curr.user.getPublicProfile());
     res.send(users);
   } catch (ex) {
-      res.status(500).send("Internal Server Error")
+    res.status(500).send("Internal Server Error");
   }
 });
 
