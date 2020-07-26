@@ -41,12 +41,7 @@ router.get("/", auth, role, async (req, res) => {
   try {
     const users = await Users.find({});
     const modified = users.map((curr) => {
-      const obj = curr.toObject();
-      delete obj.password;
-      delete obj.tokens;
-      obj.key = obj._id;
-      delete obj._id;
-      return obj;
+      return curr.getPublicProfile();
     });
     res.send(modified);
   } catch (err) {

@@ -61,6 +61,15 @@ userSchema.statics.findByCredentials = async (email, password) => {
   if (!isMatch) throw new Error();
   return user;
 };
+userSchema.methods.getPublicProfile = function () {
+  const user = { ...this.toObject() };
+  delete user.password;
+  delete user.tokens;
+  delete user.__v;
+  user.key = user._id;
+  delete user._id;
+  return user;
+};
 userSchema.pre("save", async function (next) {
   const user = this;
   if (user.isModified("password"))
