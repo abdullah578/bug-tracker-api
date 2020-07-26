@@ -14,7 +14,8 @@ const projSchema = new mongoose.Schema({
       user: {
         required: true,
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
+        _id: false,
+        ref: "users",
       },
     },
   ],

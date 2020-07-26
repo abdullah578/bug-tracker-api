@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
     {
       token: {
         required: true,
+        _id: false,
         type: String,
       },
     },

@@ -42,4 +42,16 @@ router.post("/users", auth, role, async (req, res) => {
   }
 });
 
+router.get("/:id/users", auth, async (req, res) => {
+  const projid = req.params.id;
+  try {
+    const project = await Project.findById(projid);
+    await project.populate("users.user").execPopulate();
+    const users = project.users.map((curr) => curr.user.getPublicProfile());
+    res.send(users);
+  } catch (ex) {
+      res.status(500).send("Internal Server Error")
+  }
+});
+
 module.exports = router;
