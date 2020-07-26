@@ -1,7 +1,7 @@
 const express = require("express");
 const Project = require("../models/projects");
 const auth = require("../middleware/auth");
-const { admin, role } = require("../middleware/role");
+const { admin, role, role3 } = require("../middleware/role");
 
 const router = new express.Router();
 
@@ -9,13 +9,13 @@ router.post("/", auth, admin, async (req, res) => {
   try {
     const project = new Project(req.body);
     await project.save();
-    res.status(201).send({ name: project._id });
+    res.status(201).send();
   } catch (err) {
     res.status(400).send({ error: "Failed to save project" });
   }
 });
 
-router.get("/", auth, async (req, res) => {
+router.get("/", auth, role3, async (req, res) => {
   try {
     let projects;
     if (req.user.role === "Admin") {
@@ -43,7 +43,7 @@ router.post("/:id/users", auth, role, async (req, res) => {
   }
 });
 
-router.get("/:id/users", auth, async (req, res) => {
+router.get("/:id/users", auth, role3, async (req, res) => {
   const projid = req.params.id;
   try {
     const project = await Project.findById(projid);
@@ -57,3 +57,4 @@ router.get("/:id/users", auth, async (req, res) => {
 });
 
 module.exports = router;
+
