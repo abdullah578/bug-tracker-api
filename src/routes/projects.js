@@ -12,7 +12,7 @@ router.post("/", auth, admin, async (req, res) => {
   try {
     const project = new Project(req.body);
     await project.save();
-    res.status(201).send();
+    res.status(201).send({ name: project._id });
   } catch (err) {
     res.status(400).send({ error: "Failed to save project" });
   }
@@ -78,12 +78,12 @@ router.delete("/:id/:userid", auth, role, async (req, res) => {
   try {
     const user = await User.findById(userid);
     let tickets = await Ticket.find({
-      $or: [{ assignedEmail: user.email }, { submitterEmail: user.email }],
+      assignedEmail: user.email,
       projid: id,
     });
     tickets = tickets.map((curr) => curr._id.toString());
     await Ticket.deleteMany({
-      $or: [{ assignedEmail: user.email }, { submitterEmail: user.email }],
+      assignedEmail: user.email,
       projid: id,
     });
     const project = await Project.findById(id);
@@ -96,7 +96,5 @@ router.delete("/:id/:userid", auth, role, async (req, res) => {
     res.status(404).send({ error: "Not found" });
   }
 });
-
-
 
 module.exports = router;

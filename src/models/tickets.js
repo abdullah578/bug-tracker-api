@@ -75,7 +75,7 @@ const ticketSchema = new mongoose.Schema({
     },
   },
   created: {
-    type: Date,
+    type: String,
     required: true,
   },
   comments: [
@@ -117,12 +117,12 @@ const ticketSchema = new mongoose.Schema({
     },
   ],
 });
-ticketSchema.methods.getPublicProfile=function(){
-    const ticket={...this.toObject()};
-    ticket.key=ticket._id;
-    delete ticket._id;
-    return ticket;
-}
+ticketSchema.methods.getPublicProfile = function () {
+  const ticket = { ...this.toObject() };
+  ticket.key = ticket._id;
+  delete ticket._id;
+  return ticket;
+};
 const Tickets = mongoose.model("tickets", ticketSchema);
 
 module.exports = Tickets;

@@ -48,7 +48,7 @@ userSchema.methods.generateAuthToken = async function () {
       role: user.role,
       _id: user._id,
     },
-    "Thisismybugtrackerpayloadsectret",
+    process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
   user.tokens.push({ token });

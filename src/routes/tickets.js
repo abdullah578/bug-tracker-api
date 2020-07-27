@@ -72,4 +72,14 @@ router.get("/:projid", auth, role3, async (req, res) => {
     res.status(500).send({ error: "An internal server error occured" });
   }
 });
+router.delete("/:id", auth, role2, async (req, res) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) throw new Error();
+    await ticket.remove();
+    res.send();
+  } catch (err) {
+    res.status(404).send({ error: "Ticket not found" });
+  }
+});
 module.exports = router;
