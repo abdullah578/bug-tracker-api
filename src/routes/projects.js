@@ -1,7 +1,10 @@
 const express = require("express");
 const Project = require("../models/projects");
+const Ticket = require("../models/tickets");
+const User = require("../models/users");
 const auth = require("../middleware/auth");
 const { admin, role, role3 } = require("../middleware/role");
+const Tickets = require("../models/tickets");
 
 const router = new express.Router();
 
@@ -56,5 +59,44 @@ router.get("/:id/users", auth, role3, async (req, res) => {
   }
 });
 
-module.exports = router;
+router.delete("/:id", auth, admin, async (req, res) => {
+  const projid = req.params.id;
+  console.log("h");
+  try {
+    let tickets = await Tickets.find({ projid });
+    tickets = tickets.map((curr) => curr._id.toString());
+    await Ticket.deleteMany({ projid });
+    await Project.deleteOne({ _id: projid });
+    res.send(tickets);
+  } catch (ex) {
+    res.status(404).send({ error: "Project not found" });
+  }
+});
 
+router.delete("/:id/:userid", auth, role, async (req, res) => {
+  const { id, userid } = req.params;
+  try {
+    const user = await User.findById(userid);
+    let tickets = await Ticket.find({
+      $or: [{ assignedEmail: user.email }, { submitterEmail: user.email }],
+      projid: id,
+    });
+    tickets = tickets.map((curr) => curr._id.toString());
+    await Ticket.deleteMany({
+      $or: [{ assignedEmail: user.email }, { submitterEmail: user.email }],
+      projid: id,
+    });
+    const project = await Project.findById(id);
+    project.users = project.users.filter(
+      (curr) => curr.user.toString() !== userid
+    );
+    await project.save();
+    res.send(tickets);
+  } catch (err) {
+    res.status(404).send({ error: "Not found" });
+  }
+});
+
+
+
+module.exports = router;

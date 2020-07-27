@@ -9,6 +9,7 @@ router.post("/", auth, role2, async (req, res) => {
   try {
     const ticket = new Ticket(req.body);
     await ticket.save();
+    res.send({ name: ticket._id });
   } catch (err) {
     res.status(400).send({ error: err });
   }

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const projSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -20,7 +19,6 @@ const projSchema = new mongoose.Schema({
     },
   ],
 });
-
 projSchema.methods.getPublicProfile = function () {
   const proj = { ...this.toObject() };
   delete proj.users;
@@ -29,6 +27,8 @@ projSchema.methods.getPublicProfile = function () {
   delete proj._id;
   return proj;
 };
+
+
 
 const Projects = mongoose.model("projects", projSchema);
 
