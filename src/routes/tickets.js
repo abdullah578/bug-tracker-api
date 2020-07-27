@@ -45,7 +45,7 @@ router.get("/", auth, role3, async (req, res) => {
         ],
       });
     }
-    tickets = tickets.map((curr) => curr.getPublicProfile());
+    tickets = tickets.map((curr) => curr.getPublicProfile()).reverse();
     res.send(tickets);
   } catch (err) {
     res.status(500).send({ error: "Internal Server Error" });

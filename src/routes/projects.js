@@ -26,7 +26,7 @@ router.get("/", auth, role3, async (req, res) => {
     } else {
       projects = await Project.find({ "users.user": req.user._id });
     }
-    const modified = projects.map((curr) => curr.getPublicProfile());
+    const modified = projects.map((curr) => curr.getPublicProfile()).reverse();
     res.send(modified);
   } catch (ex) {
     res.status(500).send({ error: "An internal server error occured" });
