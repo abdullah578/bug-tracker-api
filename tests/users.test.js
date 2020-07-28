@@ -55,10 +55,12 @@ test("Should get list of users if admin or project manager", async () => {
   const response1 = await request(app)
     .get("/users")
     .set("auth", `Bearer ${userOne.tokens[0].token}`)
+    .send()
     .expect(200);
   const response2 = await request(app)
     .get("/users")
     .set("auth", `Bearer ${userTwo.tokens[0].token}`)
+    .send()
     .expect(200);
   expect(response1.body).toHaveLength(4);
   expect(response2.body).toHaveLength(4);
@@ -68,6 +70,7 @@ test("Should not get list of users if not admin or project manager", async () =>
   await request(app)
     .get("/users")
     .set("auth", `Bearer ${userThree.tokens[0].token}`)
+    .send()
     .expect(403);
 });
 

@@ -37,7 +37,14 @@ router.post("/:id/users", auth, role, async (req, res) => {
   const projid = req.params.id;
   const userid = req.body.userid;
   try {
-    const project = await Project.findById(projid);
+    const project =
+      req.user.role === "Admin"
+        ? await Project.findById(projid)
+        : await Project.findOne({ _id: projid, "users.user": req.user._id });
+
+    if (!project) throw new Error();
+    const find = project.users.find((curr) => curr.user.toString() === userid);
+    if (find) throw new Error();
     project.users.push({ user: userid });
     await project.save();
     res.send();
@@ -55,13 +62,12 @@ router.get("/:id/users", auth, role3, async (req, res) => {
     const users = project.users.map((curr) => curr.user.getPublicProfile());
     res.send(users);
   } catch (ex) {
-    res.status(500).send("Internal Server Error");
+    res.status(404).send("Project not found");
   }
 });
 
 router.delete("/:id", auth, admin, async (req, res) => {
   const projid = req.params.id;
-  console.log("h");
   try {
     let tickets = await Tickets.find({ projid });
     tickets = tickets.map((curr) => curr._id.toString());
@@ -77,6 +83,17 @@ router.delete("/:id/:userid", auth, role, async (req, res) => {
   const { id, userid } = req.params;
   try {
     const user = await User.findById(userid);
+    const project =
+      req.user.role === "Admin"
+        ? await Project.findById(id)
+        : await Project.findOne({ _id: id, "users.user": req.user._id });
+    if (!project) throw new Error();
+    const userIndex = project.users.findIndex(
+      (curr) => curr.user.toString() === userid
+    );
+    if (userIndex == -1) throw new Error();
+    project.users.splice(userIndex, 1);
+    await project.save();
     let tickets = await Ticket.find({
       assignedEmail: user.email,
       projid: id,
@@ -86,11 +103,6 @@ router.delete("/:id/:userid", auth, role, async (req, res) => {
       assignedEmail: user.email,
       projid: id,
     });
-    const project = await Project.findById(id);
-    project.users = project.users.filter(
-      (curr) => curr.user.toString() !== userid
-    );
-    await project.save();
     res.send(tickets);
   } catch (err) {
     res.status(404).send({ error: "Not found" });
