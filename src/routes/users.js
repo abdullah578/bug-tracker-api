@@ -12,9 +12,7 @@ router.post("/", async (req, res) => {
   try {
     await user.save();
     const token = await user.generateAuthToken();
-    res
-      .status(201)
-      .send({ idToken: token, expiresIn: 3000, localId: user._id });
+    res.status(201).send({ idToken: token, expiresIn: 10, localId: user._id });
   } catch (err) {
     res.status(400).send({
       error: "Invalid email or password",
@@ -26,7 +24,7 @@ router.post("/login", async (req, res) => {
   try {
     const user = await Users.findByCredentials(email, password);
     const token = await user.generateAuthToken();
-    res.send({ idToken: token, expiresIn: 3000, localId: user._id });
+    res.send({ idToken: token, expiresIn: 10, localId: user._id });
   } catch (err) {
     res.status(400).send({ error: "Invalid email or password" });
   }
@@ -39,6 +37,18 @@ router.post("/logout", auth, async (req, res) => {
     res.send();
   } catch (err) {
     res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/logout/:token/:id", auth, async (req, res) => {
+  try {
+    const token = req.params.token;
+    const user = await Users.findById(req.params.id);
+    user.tokens = user.tokens.filter((curr) => curr.token !== token);
+    await user.save();
+    res.send();
+  } catch (err) {
+    res.status(500).send({ error: "Internal server error" });
   }
 });
 router.get("/", auth, role, async (req, res) => {

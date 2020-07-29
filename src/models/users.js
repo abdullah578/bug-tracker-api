@@ -49,7 +49,7 @@ userSchema.methods.generateAuthToken = async function () {
       _id: user._id,
     },
     process.env.JWT_SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "15s" }
   );
   user.tokens.push({ token });
   await user.save();
