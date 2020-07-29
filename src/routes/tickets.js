@@ -6,6 +6,11 @@ const auth = require("../middleware/auth");
 const { role2, role3 } = require("../middleware/role");
 const router = new express.Router();
 
+/**
+ * Create a new ticket for a project
+ * Both submitter and assigned users must be part of the project
+ * Admin need not be part of the project to be a submitter
+ */
 router.post("/", auth, role2, async (req, res) => {
   try {
     const project = await Project.findById(req.body.projid).populate(
@@ -27,6 +32,12 @@ router.post("/", auth, role2, async (req, res) => {
     res.status(400).send({ error: err });
   }
 });
+
+/**
+ * Update a ticket
+ * Developer can only update the ticket status and add comments
+ * All other users can update any of the ticket properties
+ */
 router.put("/:id", auth, role3, async (req, res) => {
   try {
     const allowedProperties = ["status", "comments", "history"];
@@ -43,6 +54,12 @@ router.put("/:id", auth, role3, async (req, res) => {
     res.status(400).send({ error: "Bad request" });
   }
 });
+/**
+ * Fetch all the user tickets
+ * Fetch all tickets if admin
+ * Fetch all project tickets if project manager
+ * Fetch tickets submited or assigned to you if submitter or developer
+ */
 router.get("/", auth, role3, async (req, res) => {
   try {
     let tickets = [];
@@ -69,7 +86,9 @@ router.get("/", auth, role3, async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
-
+/**
+ * Fetch tickets for a project
+ */
 router.get("/:projid", auth, role3, async (req, res) => {
   try {
     let tickets = [];
@@ -90,6 +109,9 @@ router.get("/:projid", auth, role3, async (req, res) => {
     res.status(500).send({ error: "An internal server error occured" });
   }
 });
+/**
+ * Delete a ticket given by id
+ */
 router.delete("/:id", auth, role2, async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.id);

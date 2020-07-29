@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const Users = require("../models/users");
-
+/**
+ * This middlewware allows user to access routes only if they are authentciated
+ */
 const auth = async (req, res, next) => {
   try {
     const token = req.header("auth").replace("Bearer ", "");

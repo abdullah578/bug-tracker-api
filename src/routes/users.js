@@ -7,6 +7,10 @@ const Project = require("../models/projects");
 
 const router = new express.Router();
 
+/**
+ * Sign up a new user
+ * Sends an auth token that expires in 1 hour
+ */
 router.post("/", async (req, res) => {
   const user = new Users(req.body);
   try {
@@ -19,6 +23,9 @@ router.post("/", async (req, res) => {
     });
   }
 });
+/**
+ * Login user with the right credentials
+ */
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -29,6 +36,9 @@ router.post("/login", async (req, res) => {
     res.status(400).send({ error: "Invalid email or password" });
   }
 });
+/**
+ * Remove token from the tokens array
+ */
 router.post("/logout", auth, async (req, res) => {
   try {
     const user = req.user;
@@ -39,6 +49,9 @@ router.post("/logout", auth, async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
+/**
+ * Remove an expired token from the tokens array
+ */
 
 router.post("/logout/:token/:id", auth, async (req, res) => {
   try {
@@ -51,6 +64,9 @@ router.post("/logout/:token/:id", auth, async (req, res) => {
     res.status(500).send({ error: "Internal server error" });
   }
 });
+/**
+ * Get a list of users 
+ */
 router.get("/", auth, role, async (req, res) => {
   try {
     const users = await Users.find({});
@@ -62,6 +78,11 @@ router.get("/", auth, role, async (req, res) => {
     res.status(500).send({ error: "An internal error occured" });
   }
 });
+/**
+ * Change the role of a user
+ * If the role is changed to N/A,the user is removed from all projects 
+ * and his corresponding tickets are deleted
+ */
 router.put("/", auth, admin, async (req, res) => {
   const id = req.body.key;
   try {

@@ -38,7 +38,9 @@ const userSchema = new mongoose.Schema({
     },
   ],
 });
-
+/**
+ * Create a jwt using the jsonwebtoken module
+ */
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign(
@@ -71,6 +73,9 @@ userSchema.methods.getPublicProfile = function () {
   delete user._id;
   return user;
 };
+/**
+ * Use the bcryptjs module to hide the password
+ */
 userSchema.pre("save", async function (next) {
   const user = this;
   if (user.isModified("password"))

@@ -7,7 +7,7 @@ const { admin, role, role3 } = require("../middleware/role");
 const Tickets = require("../models/tickets");
 
 const router = new express.Router();
-
+//Create a new project(if admin)
 router.post("/", auth, admin, async (req, res) => {
   try {
     const project = new Project(req.body);
@@ -17,7 +17,12 @@ router.post("/", auth, admin, async (req, res) => {
     res.status(400).send({ error: "Failed to save project" });
   }
 });
-
+/*
+get projects for the user
+Admins get all projects in the database
+Rest of the users get projects assigned to them
+Sends a list of the projects in descending order of date created
+*/
 router.get("/", auth, role3, async (req, res) => {
   try {
     let projects;
@@ -32,7 +37,11 @@ router.get("/", auth, role3, async (req, res) => {
     res.status(500).send({ error: "An internal server error occured" });
   }
 });
-
+/*
+add users to projects if admin or project manager
+admins can add users to any project
+project managers can add users to the projects assigned to them
+*/
 router.post("/:id/users", auth, role, async (req, res) => {
   const projid = req.params.id;
   const userid = req.body.userid;
@@ -53,6 +62,9 @@ router.post("/:id/users", auth, role, async (req, res) => {
   }
 });
 
+/**
+ * Returns a list of users for a project given by id
+ */
 router.get("/:id/users", auth, role3, async (req, res) => {
   const projid = req.params.id;
   try {
@@ -66,6 +78,11 @@ router.get("/:id/users", auth, role3, async (req, res) => {
   }
 });
 
+/*
+Delete a project given by id if admin
+Delete all tickets associated with the project
+Sends a list of the deleted tickets
+*/ 
 router.delete("/:id", auth, admin, async (req, res) => {
   const projid = req.params.id;
   try {
@@ -78,6 +95,14 @@ router.delete("/:id", auth, admin, async (req, res) => {
     res.status(404).send({ error: "Project not found" });
   }
 });
+
+/**
+ * Delete a user from a project if admin or project manager
+ * Admins can delete users from any project
+ * Project managers can delete users from projects assigned to them
+ * Delete all tickets assigned to the user for the project
+ * Sends a list of the deleted tickets
+ */
 
 router.delete("/:id/:userid", auth, role, async (req, res) => {
   const { id, userid } = req.params;

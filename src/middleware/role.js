@@ -1,3 +1,12 @@
+/**
+ * There are 4 roles each user can have
+ * Admin
+ * Project Manager
+ * Submitter
+ * Developer
+ * 
+ * Thid middleware prevents certain users from accessing routes based on their role
+ */
 const role = async (req, res, next) => {
   if (req.user.role === "Admin" || req.user.role === "Project Manager") {
     next();
