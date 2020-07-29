@@ -61,6 +61,10 @@ const ticketSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
+  projName: {
+    type: String,
+    required: true,
+  },
   status: {
     type: String,
     required: true,
