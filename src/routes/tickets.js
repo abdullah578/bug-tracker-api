@@ -84,7 +84,7 @@ router.get("/:projid", auth, role3, async (req, res) => {
         projid: req.params.projid,
       });
     }
-    tickets = tickets.map((curr) => curr.getPublicProfile());
+    tickets = tickets.map((curr) => curr.getPublicProfile()).reverse();
     res.send(tickets);
   } catch (err) {
     res.status(500).send({ error: "An internal server error occured" });
