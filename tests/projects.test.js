@@ -2,6 +2,7 @@ const request = require("supertest");
 const app = require("../src/app");
 const mongoose = require("mongoose");
 const Project = require("../src/models/projects");
+const Ticket = require("../src/models/tickets");
 const setUpdb = require("./fixtures/db.js");
 const { userOne, userTwo, userThree, userFour } = require("./fixtures/users");
 const { projectOne, projectTwo, projectThree } = require("./fixtures/projects");
@@ -154,6 +155,11 @@ test("Delete user from project if project manger", async () => {
   const user = project.users.find(
     (curr) => curr.user.toString() === userThree._id.toString()
   );
+  const tickets = await Ticket.find({
+    assignedEmail: userThree.email,
+    projid: projectThree._id,
+  });
+  expect(tickets).toHaveLength(0);
   if (user) throw new Error();
 });
 
@@ -214,16 +220,17 @@ test("Delete project if admin", async () => {
     .send()
     .expect(200);
   const project = await Project.findById(projectOne._id);
+  const tickets = await Ticket.find({ projid: projectOne._id });
   expect(project).toBeNull();
+  expect(tickets).toHaveLength(0);
 });
 
 test("Cannot delete project if not admin", async () => {
-    await request(app)
-      .delete(`/projects/${projectTwo._id}`)
-      .set("auth", `Bearer ${userTwo.tokens[0].token}`)
-      .send()
-      .expect(403);
-    const project = await Project.findById(projectTwo._id);
-    expect(project).not.toBeNull();
-  });
-  
+  await request(app)
+    .delete(`/projects/${projectTwo._id}`)
+    .set("auth", `Bearer ${userTwo.tokens[0].token}`)
+    .send()
+    .expect(403);
+  const project = await Project.findById(projectTwo._id);
+  expect(project).not.toBeNull();
+});

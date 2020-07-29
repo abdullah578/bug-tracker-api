@@ -1,6 +1,8 @@
 const request = require("supertest");
 const app = require("../src/app");
+const Project = require("../src/models/projects");
 const User = require("../src/models/users");
+const Ticket = require("../src/models/tickets");
 const setUpdb = require("./fixtures/db.js");
 const { userOne, userTwo, userThree } = require("./fixtures/users");
 
@@ -83,6 +85,22 @@ test("Should update user if admin", async () => {
     .expect(200);
   const user = await User.findById(userThree._id);
   expect(user.role).toBe(newRole);
+});
+
+test(`Should delete user from all projects 
+and remove corresponding tickets if role is changed to "N/A"`, async () => {
+  const newRole = "N/A";
+  await request(app)
+    .put("/users")
+    .set("auth", `Bearer ${userOne.tokens[0].token}`)
+    .send({ key: userThree._id, role: newRole })
+    .expect(200);
+  const projects = await Project.find({ "users.user": userThree._id });
+  const tickets = await Ticket.find({
+    assignedEmail: userThree.email,
+  });
+  expect(projects).toHaveLength(0);
+  expect(tickets).toHaveLength(0);
 });
 
 test("Should not update user if not admin", async () => {

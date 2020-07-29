@@ -91,7 +91,7 @@ router.delete("/:id/:userid", auth, role, async (req, res) => {
     const userIndex = project.users.findIndex(
       (curr) => curr.user.toString() === userid
     );
-    if (userIndex == -1) throw new Error();
+    if (userIndex === -1) throw new Error();
     project.users.splice(userIndex, 1);
     await project.save();
     let tickets = await Ticket.find({

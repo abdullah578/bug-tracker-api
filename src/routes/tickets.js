@@ -1,21 +1,39 @@
 const express = require("express");
 const Project = require("../models/projects");
 const Ticket = require("../models/tickets");
+const User = require("../models/users");
 const auth = require("../middleware/auth");
 const { role2, role3 } = require("../middleware/role");
 const router = new express.Router();
 
 router.post("/", auth, role2, async (req, res) => {
   try {
+    const project = await Project.findById(req.body.projid).populate(
+      "users.user"
+    );
+    const submitter = await User.findOne({ email: req.body.submitterEmail });
+    const submitterFound =
+      submitter.role === "Admin" ||
+      project.users.find((curr) => curr.user.email === req.body.submitterEmail);
+    const assignedFound = project.users.find(
+      (curr) => curr.user.email === req.body.assignedEmail
+    );
+    if (!submitterFound || !assignedFound || submitter.email !== req.user.email)
+      throw new Error();
     const ticket = new Ticket(req.body);
     await ticket.save();
-    res.send({ name: ticket._id });
+    res.status(201).send({ name: ticket._id });
   } catch (err) {
     res.status(400).send({ error: err });
   }
 });
 router.put("/:id", auth, role3, async (req, res) => {
   try {
+    const allowedProperties = ["status", "comments", "history"];
+    const isValid = Object.keys(req.body).every((prop) =>
+      allowedProperties.includes(prop)
+    );
+    if (req.user.role === "Developer" && !isValid) throw new Error();
     const ticket = await Ticket.findByIdAndUpdate(req.params.id, req.body, {
       runValidators: true,
       new: true,
