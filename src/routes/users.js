@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
   try {
     await user.save();
     const token = await user.generateAuthToken();
-    res.status(201).send({ idToken: token, expiresIn: 10, localId: user._id });
+    res.status(201).send({ idToken: token, expiresIn: 3000, localId: user._id });
   } catch (err) {
     res.status(400).send({
       error: "Invalid email or password",
@@ -31,7 +31,7 @@ router.post("/login", async (req, res) => {
   try {
     const user = await Users.findByCredentials(email, password);
     const token = await user.generateAuthToken();
-    res.send({ idToken: token, expiresIn: 10, localId: user._id });
+    res.send({ idToken: token, expiresIn: 3000, localId: user._id });
   } catch (err) {
     res.status(400).send({ error: "Invalid email or password" });
   }
